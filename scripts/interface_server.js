@@ -6,7 +6,7 @@ var _ = require('underscore');
 var url = __dirname + '/wsdl/Messages.svc.xml';
 
 var PAGE_SIZE = 20;
-var RUN_PERIOD_SEC = 10;
+var RUN_PERIOD_SEC = 60;
 
 var res = {}; // Global resources
 
@@ -20,7 +20,7 @@ function handleErrors(err){
 
 function mapSkywaveMessage(message){
 	message._id = message.ID;
-	message.ReceiveUTC = Date(message.ReceiveUTC);
+	message.ReceiveUTC = new Date(message.ReceiveUTC);
 	message.Processed = false;
 	
 	if(message.Payload){
@@ -81,7 +81,7 @@ async.parallel([
 
 function main(nextRun){
 	
-	res.db.collection('accounts').find().toArray(function(err, accounts) {
+	res.db.collection('accounts').find({active : true}).toArray(function(err, accounts) {
 		handleErrors(err);
 		
 		console.log("Processing",accounts.length, "accounts.");
@@ -159,7 +159,7 @@ function updateAllMobilesFromAccount(account){
 					function (mobile){
 						mobile._id = mobile.ID;
 						mobile.ID = undefined;
-						mobile.LastRegistrationUTC = Date(mobile.LastRegistrationUTC);
+						mobile.LastRegistrationUTC = new Date(mobile.LastRegistrationUTC);
 						mobile.AccountID = account._id
 						return mobile;
 					}
